@@ -1,0 +1,14 @@
+{
+  "name": "frith-hilton-collage-generator",
+  "version": "1.0.0",
+  "description": "Generates book collage image",
+  "main": "generate-collage.js",
+  "scripts": {
+    "generate": "node generate-collage.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
+  },
+  "author": "Frith Hilton",
+  "license": "MIT"
+}
