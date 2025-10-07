@@ -60,7 +60,7 @@ const cols = 15;
 const rows = 3;
 const cellWidth = targetWidth / cols;
 const cellHeight = targetHeight / rows;
-const gap = 0;  // No gap for seamless collage
+const gap = 3;  // No gap for seamless collage
 
 // Create canvas
 const canvas = createCanvas(targetWidth, targetHeight);
