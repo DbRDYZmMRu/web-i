@@ -17,7 +17,6 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: package-lock.json  # Explicitly points to lock file for caching
 
       - name: Install system dependencies for canvas
         run: |
@@ -25,10 +24,15 @@ jobs:
           sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
       - name: Install Node dependencies
-        run: npm ci  # Uses lock file for exact, fast install (cached)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Generate collage
-        run: npm run generate  # Runs your script via package.json script
+        run: npm run generate  # Assumes package.json has "generate" script
 
       - name: Commit and push image
         run: |
