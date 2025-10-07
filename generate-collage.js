@@ -1,7 +1,7 @@
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 
-// List of image URLs from your template (you added extras at the end; kept them)
+// List of image URLs from your template (removed the last duplicate for exactly 45 images)
 const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/i/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/ii/Cover Image.png',
@@ -45,22 +45,28 @@ const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/W2W/11/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/W2W/12/cover.jpg', 
     'https://www.frithhilton.com.ng/images/collections/xiv/cover.jpeg',
-                'https://www.frithhilton.com.ng/images/collections/viii/Cover.jpg',
+    'https://www.frithhilton.com.ng/images/collections/viii/Cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xiii/cover.jpg',
-    'https://www.frithhilton.com.ng/images/collections/xvii/cover.jpg', 
-            'https://www.frithhilton.com.ng/images/collections/ii/Cover Image.png'
+    'https://www.frithhilton.com.ng/images/collections/xvii/cover.jpg'
 ];
 
 // High-res settings for clarity
 const targetWidth = 1500;
 const targetHeight = 500;
 
-// Grid: 15 cols x 3 rows (45 cells for 45 images)
+// Number of images
+const numImages = imageUrls.length;  // 45 images
+
+// Grid: 15 cols x 3 rows = 45 cells exactly
 const cols = 15;
 const rows = 3;
-const cellWidth = targetWidth / cols;
-const cellHeight = targetHeight / rows;
-const gap = 3;  // No gap for seamless collage
+const gap = 3;
+
+// Adjust cell sizes to fit gaps without overflow
+const totalHorizontalGaps = (cols - 1) * gap;
+const totalVerticalGaps = (rows - 1) * gap;
+const cellWidth = (targetWidth - totalHorizontalGaps) / cols;
+const cellHeight = (targetHeight - totalVerticalGaps) / rows;
 
 // Create canvas
 const canvas = createCanvas(targetWidth, targetHeight);
@@ -89,8 +95,10 @@ async function generateCollage() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, targetWidth, targetHeight);
 
-    // Draw images
+    // Draw images (exactly 45; fills all cells)
     images.forEach((img, index) => {
+        if (index >= cols * rows) return;  // Safety, but not needed for 45
+
         if (!img) {
             // Placeholder
             ctx.fillStyle = '#f8f9fa';
@@ -113,7 +121,7 @@ async function generateCollage() {
     // Save PNG
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync('frith-hilton-book-collage.png', buffer);
-    console.log('Collage generated: frith-hilton-book-collage.png');
+    console.log(`Collage generated: frith-hilton-book-collage.png (${numImages} images in ${cols}x${rows} grid)`);
 }
 
 generateCollage().catch(console.error);
