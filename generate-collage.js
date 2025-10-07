@@ -45,7 +45,7 @@ const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/W2W/11/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/W2W/12/cover.jpg', 
     'https://www.frithhilton.com.ng/images/collections/xiv/cover.jpeg',
-    'https://www.frithhilton.com.ng/images/collections/xiii/cover.jpg',
+                'https://www.frithhilton.com.ng/images/collections/viii/Cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xiii/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xvii/cover.jpg', 
             'https://www.frithhilton.com.ng/images/collections/ii/Cover Image.png'
