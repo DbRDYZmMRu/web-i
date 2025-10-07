@@ -24,20 +24,15 @@ jobs:
           sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
       - name: Install Node dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install  # Generates/updates package-lock.json automatically
 
       - name: Generate collage
-        run: npm run generate  # Assumes package.json has "generate" script
+        run: npm run generate  # Runs your script via package.json script
 
-      - name: Commit and push image
+      - name: Commit and push image and lock file
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add frith-hilton-book-collage.png
-          git diff --staged --quiet || git commit -m "Update book collage (generated on $(date +'%Y-%m-%d %H:%M:%S'))"
+          git add frith-hilton-book-collage.png package-lock.json
+          git diff --staged --quiet || git commit -m "Update book collage and lock file (generated on $(date +'%Y-%m-%d %H:%M:%S'))"
           git push
