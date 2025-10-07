@@ -1,0 +1,38 @@
+name: Generate Book Collage
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # For push permissions
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          # Install system libs for node-canvas
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+          npm init -y
+          npm install canvas
+
+      - name: Generate collage
+        run: node generate-collage.js
+
+      - name: Commit and push image
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add frith-hilton-book-collage.png
+          git diff --staged --quiet || git commit -m "Add/update book collage (generated on $(date +'%Y-%m-%d %H:%M:%S'))"
+          git push
