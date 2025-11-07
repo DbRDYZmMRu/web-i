@@ -49,10 +49,12 @@ const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/xiii/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xvii/cover.jpg',
     // Added 4 duplicates for full 49
-    'https://www.frithhilton.com.ng/images/collections/W2W/1/cover.jpg',
-    'https://www.frithhilton.com.ng/images/collections/W2W/2/cover.jpg',
-    'https://www.frithhilton.com.ng/images/collections/i/cover.jpg',
-    'https://www.frithhilton.com.ng/images/collections/ii/Cover Image.png'
+    'https://www.frithhilton.com.ng/images/collections/W2W/13/cover.jpg', 
+    'https://www.frithhilton.com.ng/images/collections/W2W/14/cover.jpg',
+    'https://www.frithhilton.com.ng/images/collections/W2W/15/cover.jpg', 
+
+'https://www.frithhilton.com.ng/images/collections/W2W/16/cover.jpg' 
+
 ];
 
 // High-res settings for clarity (square 1:1 ratio)
