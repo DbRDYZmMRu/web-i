@@ -1,7 +1,7 @@
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
 
-// List of image URLs from your template (expanded to exactly 49 by adding 4 duplicates: W2W/1, W2W/2, Collection I, Collection II)
+// List of image URLs (unchanged, 49 images)
 const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/i/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/ii/Cover Image.png',
@@ -48,27 +48,20 @@ const imageUrls = [
     'https://www.frithhilton.com.ng/images/collections/viii/Cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xiii/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/xvii/cover.jpg',
-    // Added 4 duplicates for full 49
     'https://www.frithhilton.com.ng/images/collections/W2W/13/cover.jpg', 
     'https://www.frithhilton.com.ng/images/collections/W2W/14/cover.jpg',
     'https://www.frithhilton.com.ng/images/collections/W2W/15/cover.jpg', 
-
-'https://www.frithhilton.com.ng/images/collections/W2W/16/cover.jpg' 
-
+    'https://www.frithhilton.com.ng/images/collections/W2W/16/cover.jpg'
 ];
 
-// High-res settings for clarity (square 1:1 ratio)
-const targetSize = 1500;
-const targetWidth = targetSize;
-const targetHeight = targetSize;
+// New target resolution: 1080x360 (3:1 aspect ratio)
+const targetWidth = 1080;
+const targetHeight = 360;
 
-// Number of images
-const numImages = imageUrls.length;  // 49 images
-
-// Grid: 7 cols x 7 rows = 49 cells
-const cols = 7;
-const rows = 7;
-const gap = 3;
+// Grid: 14 cols x 4 rows = 56 cells (we'll use 49, leaving 7 empty)
+const cols = 14;
+const rows = 4;
+const gap = 2; // Reduced gap for tighter fit
 
 // Adjust cell sizes to fit gaps without overflow
 const totalHorizontalGaps = (cols - 1) * gap;
@@ -88,7 +81,7 @@ async function generateCollage() {
     const images = [];
     let loadedImages = 0;
 
-    // Load all images (including duplicates)
+    // Load all images
     for (const url of imageUrls) {
         try {
             const img = await loadImage(url);
@@ -115,15 +108,15 @@ async function generateCollage() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, targetWidth, targetHeight);
 
-    // Draw all 49 images in shuffled order
+    // Draw 49 images in shuffled order
     shuffledImages.forEach((img, index) => {
-        if (index >= cols * rows) return;  // Safety, but not needed for 49
+        if (index >= cols * rows) return;  // Cap at 56, but only use 49
 
         const row = Math.floor(index / cols);
         const col = index % cols;
 
-        if (!img) {
-            // Placeholder
+        if (!img || index >= 49) {
+            // Placeholder or skip extras
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(
                 col * (cellWidth + gap),
@@ -143,8 +136,8 @@ async function generateCollage() {
 
     // Save PNG
     const buffer = canvas.toBuffer('image/png');
-    fs.writeFileSync('frith-hilton-book-collage.png', buffer);
-    console.log(`Collage generated: frith-hilton-book-collage.png (${numImages} images in ${cols}x${rows} grid)`);
+    fs.writeFileSync('frith-hilton-book-collage-1080x360.png', buffer);
+    console.log(`Collage generated: frith-hilton-book-collage-1080x360.png (49 images in ${cols}x${rows} grid)`);
 }
 
 generateCollage().catch(console.error);
