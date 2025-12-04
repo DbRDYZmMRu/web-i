@@ -1,0 +1,45 @@
+name: Generate KDP-Ready DOCX
+
+on:
+  push:
+    # Runs when you push to main or any branch
+    paths:
+      - 'book.json'          # Only trigger if book.json changes
+  workflow_dispatch:         # Allows you to run it manually from GitHub UI
+
+jobs:
+  build-docx:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          # We use the excellent "docx" library by dolanmiu
+          npm install docx html-to-text
+
+      - name: Generate KDP-ready DOCX
+        id: generate
+        run: node generate-docx.js
+
+      - name: Commit and push DOCX if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "*.docx"
+          git add "book.json" || echo "No JSON to add"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-generate KDP DOCX from book.json [ci skip]"
+            git push
+          fi
