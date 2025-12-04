@@ -8,11 +8,11 @@ const { htmlToText } = require("html-to-text");
 const rawData = fs.readFileSync("book.json", "utf-8");
 const book = JSON.parse(rawData);
 
-// Create document
-const doc = new Document({
-  creator: "Frith Hilton",
-  title: book.bookTitle,
-  styles: {
+// Array to hold all sections before creating the final Document
+const sections = [];
+
+// Define custom styles once
+const customStyles = {
     default: {
       document: {
         run: {
@@ -33,7 +33,7 @@ const doc = new Document({
           font: "Georgia",
         },
         paragraph: {
-          // Standard 0.5 inch (720 twips) first-line indent for poetry/prose lines
+          // Standard 0.5 inch (720 twips) first-line indent
           indent: { firstLine: 720 }, 
           spacing: { after: 120 },
         },
@@ -68,26 +68,26 @@ const doc = new Document({
         paragraph: { alignment: AlignmentType.CENTER },
       },
     ],
-  },
-});
+};
 
-// --- Title Page ---
-// FIX: Removed unnecessary wrapping array `[]` around children.
-doc.addSection({
+
+// 1. --- Title Page Section ---
+sections.push({
   children: [
     new Paragraph({
       children: [new TextRun({ text: book.bookTitle })],
-      style: "TitleStyle", // Use custom style for title formatting
+      style: "TitleStyle",
     }),
     new Paragraph({
       children: [new TextRun({ text: "Frith Hilton" })],
-      style: "AuthorStyle", // Use custom style for author name
+      style: "AuthorStyle",
     }),
   ],
 });
 
-// --- Copyright & Dedication ---
-doc.addSection({
+
+// 2. --- Copyright & Dedication Section ---
+sections.push({
   children: [
     new Paragraph({ text: book.bookTitle, alignment: AlignmentType.CENTER, keepLines: true }),
     new Paragraph({ text: "© 2025 Frith Hilton. All rights reserved.", alignment: AlignmentType.CENTER, keepLines: true }),
@@ -101,35 +101,33 @@ doc.addSection({
   ],
 });
 
-// --- Table of Contents ---
-doc.addSection({
+
+// 3. --- Table of Contents Section ---
+sections.push({
   children: [
-    // FIX: Use the custom Heading1 style for desired alignment and spacing
     new Paragraph({ text: "Contents", style: "Heading1" }),
     new Paragraph({ text: "", spacing: { after: 480 } }), 
     
-    // Create TOC entries using the Normal style
     ...book.poems.map(poem => new Paragraph({ text: poem.title, style: "Normal" })),
     
-    // Page break ensures the poems start on a fresh page
-    new Paragraph({ break: 1 }),
+    // Page break ensures the next content starts on a fresh page
+    new Paragraph({ break: "page" }),
   ],
 });
 
-// --- Poems ---
+
+// 4. --- Poems Sections ---
 book.poems.forEach(poem => {
   const poemKey = String(poem.number);
   
-  // FIX: Reverted content lookup to match the array structure of your JSON:
-  // book.content is an array, and the content object is the first element [0]
+  // Correct content lookup matching the array structure: book.content[0]
   const rawHtml = book.content[0]?.[poemKey] || "";
 
   const lines = htmlToText(rawHtml, { wordwrap: false })
     .split("\n")
     .map(l => l.trim());
-    // NOTE: We do NOT filter empty lines here to preserve stanza breaks.
 
-  doc.addSection({
+  sections.push({
     // Add a page break to ensure each poem starts on a new page
     properties: { break: "page" },
     children: [
@@ -137,16 +135,14 @@ book.poems.forEach(poem => {
           text: poem.title, 
           style: "Heading1", 
           alignment: AlignmentType.CENTER,
-          // Ensure the title stays with the first line of the poem
-          keepNext: true 
+          keepNext: true // Keep the title with the first line of the poem
       }),
-      // Map lines to paragraphs
+      
       ...lines.map(line => new Paragraph({ 
           text: line, 
           style: "Normal",
           // Reset firstLine indent for intentional blank lines (stanza breaks)
           indent: line === "" ? { firstLine: 0 } : { firstLine: 720 }, 
-          // Ensure stanzas don't break across pages where possible
           keepLines: true,
       })),
       new Paragraph(""), // Blank line at end of poem
@@ -154,8 +150,9 @@ book.poems.forEach(poem => {
   });
 });
 
-// --- Back matter ---
-doc.addSection({
+
+// 5. --- Back matter Section ---
+sections.push({
   children: [
     new Paragraph({ text: "More poetry by Frith Hilton", style: "Heading1" }),
     new Paragraph({
@@ -172,6 +169,17 @@ doc.addSection({
   ],
 });
 
+
+// Create document - FIX APPLIED HERE: Pass the accumulated 'sections' array
+const doc = new Document({
+  creator: "Frith Hilton",
+  title: book.bookTitle,
+  styles: customStyles,
+  // This is the FIX for "options.sections is not iterable"
+  sections: sections, 
+});
+
+
 // --- Save file ---
 const safeTitle = book.bookTitle.replace(/[<>:"/\\|?*]/g, ""); // remove invalid filename chars
 const outputPath = `${safeTitle} – KDP ready.docx`;
@@ -181,6 +189,5 @@ Packer.toBuffer(doc).then(buffer => {
   console.log(`KDP-ready DOCX created: ${outputPath}`);
 }).catch(err => {
     console.error("Error creating DOCX file:", err);
-    // Include error details for debugging the CI/CD workflow
     if (err.stack) console.error(err.stack);
 });
