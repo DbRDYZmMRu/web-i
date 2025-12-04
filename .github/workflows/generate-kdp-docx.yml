@@ -1,14 +1,48 @@
-# ... (Previous Steps: Checkout, Setup Node.js, Install dependencies, Generate KDP-ready DOCX)
+name: Generate KDP-Ready DOCX
+
+on:
+  push:
+    paths:
+      - 'book.json'          # Trigger if book.json changes
+      - 'generate-docx.js'   # Trigger if the script changes
+  workflow_dispatch:         # Allows manual runs
+
+jobs:
+  build-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Crucial for git-auto-commit-action to work correctly
+          fetch-depth: 0 
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm' # Use NPM caching for faster installs
+
+      - name: Install dependencies
+        # Assuming you've run 'npm install docx html-to-text' locally and added them to package.json
+        run: npm ci || npm install 
+        # NOTE: Using 'npm ci' is preferred for CI, it relies on package-lock.json
+
+      - name: Generate KDP-ready DOCX
+        # Runs the script directly, similar to what a package.json script would do
+        run: node generate-docx.js
 
       - name: Commit and push DOCX if changed
+        # FIX: Using the reliable stefanzweifel/git-auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          # FIX: Replaced the failing 'fromJson' with a generic commit message.
+          # Generic commit message to avoid JSON parsing errors (JToken error fix)
           commit_message: "Auto-generate KDP DOCX from book.json [ci skip]" 
-          # You can also use a variable if you extracted the title in a previous step,
-          # but a generic message is the safest bet to eliminate the JSON parsing error.
+          # Files to stage and commit
           files: |
             *.docx
             book.json
+          # Use the official GitHub Actions bot for clean commit history
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
