@@ -1,45 +1,14 @@
-name: Generate KDP-Ready DOCX
+# ... (Previous Steps: Checkout, Setup Node.js, Install dependencies, Generate KDP-ready DOCX)
 
-on:
-  push:
-    paths:
-      - 'book.json'          # Only trigger if book.json changes
-      - 'generate-docx.js'   # Add JS file to triggers in case logic changes
-  workflow_dispatch:         # Allows manual runs
-
-jobs:
-  build-docx:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          # Ensure full history fetch for the commit action
-          fetch-depth: 0 
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: |
-          npm install docx html-to-text
-
-      - name: Generate KDP-ready DOCX
-        run: node generate-docx.js
-      
-      # Use an action specifically designed for committing files
       - name: Commit and push DOCX if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-generate KDP DOCX for ${{fromJson(env.book).bookTitle}} [ci skip]"
-          # Only stage the generated DOCX file and the book.json file
+          # FIX: Replaced the failing 'fromJson' with a generic commit message.
+          commit_message: "Auto-generate KDP DOCX from book.json [ci skip]" 
+          # You can also use a variable if you extracted the title in a previous step,
+          # but a generic message is the safest bet to eliminate the JSON parsing error.
           files: |
             *.docx
             book.json
-          # Use the default GitHub Actions bot for cleaner attribution
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
